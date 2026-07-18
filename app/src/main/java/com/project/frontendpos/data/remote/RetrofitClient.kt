@@ -1,6 +1,9 @@
 package com.project.frontendpos.data.remote
 
 import com.project.frontendpos.BuildConfig
+import com.project.frontendpos.data.remote.api.AuthService
+import com.project.frontendpos.data.remote.api.ModifierService
+import com.project.frontendpos.data.remote.api.ProductService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -14,6 +17,20 @@ object RetrofitClient {
             .build()
     }
 
+    fun resolveImageUrl(relativePath: String?): String {
+        if (relativePath.isNullOrBlank()) return "https://placehold.co/600x400/png"
+        if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
+            return relativePath
+        }
+
+
+        val cleanBase = BASE_URL.trimEnd('/')
+        val cleanPath = if (relativePath.startsWith("/")) relativePath else "/$relativePath"
+
+        return "$cleanBase$cleanPath"
+    }
+
     val authApi: AuthService by lazy { retrofit.create(AuthService::class.java) }
     val productApi: ProductService by lazy { retrofit.create(ProductService::class.java) }
+    val modifierApi: ModifierService by lazy { retrofit.create(ModifierService::class.java) }
 }

@@ -16,20 +16,27 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-
-import com.project.frontendpos.ui.features.login.LoginScreen
-import com.project.frontendpos.ui.features.products.ProductScreen
+import com.project.frontendpos.data.local.SessionManager
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.project.frontendpos.viewmodel.ProductViewModel
+import com.project.frontendpos.viewmodel.ModifierViewModel
+import com.project.frontendpos.viewmodel.CartViewModel
+import com.project.frontendpos.ui.screens.LoginScreen
+import com.project.frontendpos.ui.screens.HomeScreen
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-
+    val productViewModel: ProductViewModel = viewModel()
+    val cartViewModel: CartViewModel = viewModel()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-
+    val modifierViewModel: ModifierViewModel = viewModel()
     val showBottomBar = bottomNavItems.any { item ->
         currentDestination?.hasRoute(item.route::class) == true
     }
+
+    val startDestination = if (SessionManager.isLoggedIn()) HomeRoute else LoginRoute
 
     Scaffold(
         bottomBar = {
@@ -58,20 +65,25 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = LoginRoute,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<LoginRoute> {
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate(ProductRoute) {
+                        navController.navigate(HomeRoute) {
                             popUpTo(LoginRoute) { inclusive = true }
                         }
                     }
                 )
             }
-            composable<ProductRoute> {
-                ProductScreen()
+            composable<HomeRoute> {
+                HomeScreen(
+                    navController = navController,
+                    productViewModel = productViewModel,
+                    cartViewModel = cartViewModel,
+                    modifierViewModel = modifierViewModel
+                )
             }
             composable<ShiftRoute> {
                 PlaceholderScreen("Shift Kerja")
