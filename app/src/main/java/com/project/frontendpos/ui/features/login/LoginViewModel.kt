@@ -30,15 +30,12 @@ class LoginViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = LoginState.Loading
             try {
+                // Passes matching data payload mapping object
                 val response = RetrofitClient.apiService.login(LoginRequest(username, password))
-
-                // Save token globally for subsequent CRUD API operations
                 SessionManager.userToken = response.token
-
                 _uiState.value = LoginState.Success
-                onSuccess() // Navigate out of login screen
+                onSuccess()
             } catch (e: Exception) {
-                e.printStackTrace() // This will print the error to Logcat
                 _uiState.value = LoginState.Error(e.localizedMessage ?: "Invalid login credentials")
             }
         }
