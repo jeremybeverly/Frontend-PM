@@ -2,9 +2,10 @@ package com.project.frontendpos.data.remote
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.project.frontendpos.BuildConfig
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.108:5000/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()
