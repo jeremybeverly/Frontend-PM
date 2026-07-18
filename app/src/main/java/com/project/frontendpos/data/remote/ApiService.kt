@@ -5,11 +5,20 @@ import retrofit2.http.*
 
 data class ProductResponse(
     val _id: String,
-    val name: String,
+    val product_name: String,
+    val category: String,
     val price: Double,
-    val sku: String? = null
+    val image_url: String? = null,
+    val recipe: List<recipeItem>? = null,
+    val modifier_groups: List<String> = emptyList(),
+    val is_available: Boolean,
+    val is_deleted: Boolean
 )
 
+data class recipeItem(
+    val ingredient_id: String,
+    val quantity_required: Double
+)
 data class ProductRequest(
     val name: String,
     val price: Double
@@ -36,6 +45,7 @@ interface ApiService {
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
 
+    //fetch produk
     @GET("api/products")
     suspend fun getProducts(
         @Header("Authorization") token: String
