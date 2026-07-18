@@ -2,8 +2,8 @@ package com.project.frontendpos.ui.features.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.project.frontendpos.data.remote.ApiService
-import com.project.frontendpos.data.remote.LoginRequest
+import com.project.frontendpos.data.model.LoginRequest
+
 import com.project.frontendpos.data.remote.RetrofitClient
 import com.project.frontendpos.data.remote.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +31,7 @@ class LoginViewModel : ViewModel() {
             _uiState.value = LoginState.Loading
             try {
                 // Passes matching data payload mapping object
-                val response = RetrofitClient.apiService.login(LoginRequest(username, password))
+                val response = RetrofitClient.authApi.login(LoginRequest(username, password))
                 SessionManager.userToken = response.token
                 _uiState.value = LoginState.Success
                 onSuccess()
