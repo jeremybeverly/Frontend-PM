@@ -1,4 +1,3 @@
-import java.lang.module.ModuleFinder.compose
 import java.util.Properties
 
 plugins {
@@ -9,9 +8,7 @@ plugins {
 
 android {
     namespace = "com.project.frontendpos"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.project.frontendpos"
@@ -53,6 +50,7 @@ android {
 
 dependencies {
     implementation(libs.retrofit)
+    implementation("io.coil-kt:coil-compose:2.6.0")
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.androidx.navigation.compose)
@@ -68,6 +66,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.services.analytics.impl)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,4 +1,4 @@
-package com.project.frontendpos.data.remote
+package com.project.frontendpos.data.remote.api
 
 import com.project.frontendpos.data.model.LoginRequest
 import com.project.frontendpos.data.model.LoginResponse

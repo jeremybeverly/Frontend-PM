@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.project.frontendpos.ui.features.products.ProductScreen
+import com.project.frontendpos.data.local.SessionManager
 import com.project.frontendpos.ui.navigation.AppNavigation
 import com.project.frontendpos.ui.theme.FrontendPOSTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SessionManager.init(applicationContext)
         setContent {
             FrontendPOSTheme {
                 Surface(
