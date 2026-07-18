@@ -1,10 +1,7 @@
 package com.project.frontendpos.data.remote
 
-import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
-
-// --- DATA MODELS ---
 
 data class ProductResponse(
     val _id: String,
@@ -35,15 +32,9 @@ data class UserInfo(
     val role: String
 )
 
-// --- RETROFIT INTERFACE ---
-
 interface ApiService {
-
-    // 1. Public Endpoint (No Token Required)
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
-
-    // 2. Protected Endpoints (Every single one needs the Authorization Header)
 
     @GET("api/products")
     suspend fun getProducts(
