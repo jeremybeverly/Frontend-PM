@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.project.frontendpos.data.local.SessionManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.frontendpos.ui.screens.CheckoutScreen
+import com.project.frontendpos.ui.screens.HistoryScreen
 import com.project.frontendpos.viewmodel.ProductViewModel
 import com.project.frontendpos.viewmodel.ModifierViewModel
 import com.project.frontendpos.viewmodel.CartViewModel
@@ -27,6 +28,8 @@ import com.project.frontendpos.ui.screens.HomeScreen
 import com.project.frontendpos.ui.screens.ShiftScreen
 import com.project.frontendpos.viewmodel.CashflowViewModel
 import com.project.frontendpos.viewmodel.ShiftViewModel
+import com.project.frontendpos.viewmodel.TransactionDetailViewModel
+import com.project.frontendpos.viewmodel.TransactionHistoryViewModel
 
 @Composable
 fun AppNavigation() {
@@ -38,6 +41,9 @@ fun AppNavigation() {
     val modifierViewModel: ModifierViewModel = viewModel()
     val cashflowViewModel: CashflowViewModel = viewModel()
     val shiftViewModel: ShiftViewModel = viewModel()
+    val transactionHistoryViewModel: TransactionHistoryViewModel = viewModel()
+    val transactionDetailViewModel: TransactionDetailViewModel = viewModel()
+
     val showBottomBar = bottomNavItems.any { item ->
         currentDestination?.hasRoute(item.route::class) == true
     }
@@ -98,7 +104,10 @@ fun AppNavigation() {
                 )
             }
             composable<HistoryRoute> {
-                PlaceholderScreen("Riwayat")
+                HistoryScreen(
+                    transactionHistoryViewModel = transactionHistoryViewModel,
+                    transactionDetailViewModel = transactionDetailViewModel
+                )
             }
             composable<CheckoutRoute> {
                 CheckoutScreen(
