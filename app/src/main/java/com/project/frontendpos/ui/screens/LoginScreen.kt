@@ -38,7 +38,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant), // Beige background
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -47,10 +47,9 @@ fun LoginScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top Logo Icon
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.primary, // Dark Blue
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(64.dp)
             ) {
                 Icon(
@@ -63,7 +62,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Title
             Text(
                 text = "Masuk ke Sistem POS",
                 style = MaterialTheme.typography.headlineSmall,
@@ -73,7 +71,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Login Form Card
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // White card
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),

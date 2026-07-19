@@ -12,10 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage // <-- Add this import
 import com.project.frontendpos.data.model.product.ProductResponse
 import java.text.NumberFormat
 import java.util.Locale
@@ -42,15 +43,24 @@ fun ProductCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(110.dp) // Fixed height for uniformity
+                        .height(110.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Image,
-                        contentDescription = "Product Image",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (!product.fullImageUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = product.fullImageUrl,
+                            contentDescription = product.product_name,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "Product Image",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 Column(

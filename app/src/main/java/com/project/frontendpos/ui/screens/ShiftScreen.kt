@@ -33,14 +33,11 @@ fun ShiftScreen(
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                if (state is ShiftUiState.Active) {
-                    shiftSummaryViewModel.loadSummary()
-                } else {
-                    shiftViewModel.refresh()
-                }
+                shiftViewModel.refresh()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -66,13 +63,14 @@ fun ShiftScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) {
             when (state) {
                 ShiftUiState.Idle -> {}
                 ShiftUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 ShiftUiState.NoActiveShift -> {
                     NoActiveShiftContent(
                         onStartShift = {
@@ -81,19 +79,18 @@ fun ShiftScreen(
                         }
                     )
                 }
+
                 is ShiftUiState.Active -> {
                     ActiveShiftContent(
                         shift = state.shift,
                         summaryState = summaryState,
                         cashflowState = cashflowState,
                         onCashIn = { amount, reason ->
-                            // FIX: Pass the direct reload command as the callback
                             cashflowViewModel.addCashIn(amount, reason) {
                                 shiftSummaryViewModel.loadSummary()
                             }
                         },
                         onCashOut = { amount, reason ->
-                            // FIX: Pass the direct reload command as the callback
                             cashflowViewModel.addCashOut(amount, reason) {
                                 shiftSummaryViewModel.loadSummary()
                             }
@@ -108,6 +105,7 @@ fun ShiftScreen(
                         }
                     )
                 }
+
                 is ShiftUiState.Error -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
