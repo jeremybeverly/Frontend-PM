@@ -5,30 +5,49 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.frontendpos.ui.components.ActiveShiftContent
 import com.project.frontendpos.ui.components.NoActiveShiftContent
 import com.project.frontendpos.viewmodel.CashflowViewModel
 import com.project.frontendpos.viewmodel.ShiftUiState
 import com.project.frontendpos.viewmodel.ShiftViewModel
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import com.project.frontendpos.viewmodel.ShiftSummaryViewModel
 
 @Composable
 fun ShiftScreen(
     shiftViewModel: ShiftViewModel = viewModel(),
     cashflowViewModel: CashflowViewModel = viewModel(),
+    shiftSummaryViewModel: ShiftSummaryViewModel = viewModel(),
     onShiftStarted: () -> Unit = {}
 ) {
     val state = shiftViewModel.uiState.value
-    val cashflowState =
-        cashflowViewModel.uiState.value
-    val snackbarHostState = remember {
-        SnackbarHostState()
-    }
+    val summaryState = shiftSummaryViewModel.uiState.value
+    val cashflowState = cashflowViewModel.uiState.value
 
+    val snackbarHostState = remember { SnackbarHostState() }
     var isStarting by remember { mutableStateOf(false) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (state is ShiftUiState.Active) {
+                    shiftSummaryViewModel.loadSummary()
+                } else {
+                    shiftViewModel.refresh()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(state) {
         if (isStarting && state is ShiftUiState.Active) {
@@ -37,79 +56,71 @@ fun ShiftScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState
-            )
+    LaunchedEffect(state) {
+        if (state is ShiftUiState.Active) {
+            shiftSummaryViewModel.loadSummary()
         }
-    ) { innerPadding -> Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        when (state) {
-            ShiftUiState.Idle -> {}
-            ShiftUiState.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(
-                        Alignment.Center
-                    )
-                )
-            }
+    }
 
-            ShiftUiState.NoActiveShift -> {
-                NoActiveShiftContent(
-                    onStartShift = {
-                        isStarting = true
-                        shiftViewModel.startShift(it)
-                    }
-                )
-            }
-
-            is ShiftUiState.Active -> {
-                ActiveShiftContent(
-                    shift = state.shift,
-                    cashflowState = cashflowState,
-                    onCashIn = { amount, reason ->
-                        cashflowViewModel.addCashIn(
-                            amount,
-                            reason
-                        )
-                    },
-
-                    onCashOut = { amount, reason ->
-                        cashflowViewModel.addCashOut(
-                            amount,
-                            reason
-                        )
-                    },
-                    onEndShift = {
-                        shiftViewModel.endShift(it)
-                    }
-                )
-            }
-
-            is ShiftUiState.Error -> {
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(state.message)
-                    Spacer(
-                        Modifier.height(16.dp)
-                    )
-
-                    Button(
-                        onClick = {
-                            shiftViewModel.refresh()
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when (state) {
+                ShiftUiState.Idle -> {}
+                ShiftUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                ShiftUiState.NoActiveShift -> {
+                    NoActiveShiftContent(
+                        onStartShift = {
+                            isStarting = true
+                            shiftViewModel.startShift(it)
                         }
+                    )
+                }
+                is ShiftUiState.Active -> {
+                    ActiveShiftContent(
+                        shift = state.shift,
+                        summaryState = summaryState,
+                        cashflowState = cashflowState,
+                        onCashIn = { amount, reason ->
+                            // FIX: Pass the direct reload command as the callback
+                            cashflowViewModel.addCashIn(amount, reason) {
+                                shiftSummaryViewModel.loadSummary()
+                            }
+                        },
+                        onCashOut = { amount, reason ->
+                            // FIX: Pass the direct reload command as the callback
+                            cashflowViewModel.addCashOut(amount, reason) {
+                                shiftSummaryViewModel.loadSummary()
+                            }
+                        },
+                        onEndShift = {
+                            shiftViewModel.endShift(it)
+                        },
+                        onExtendShift = {
+                            shiftViewModel.extendShift {
+                                shiftSummaryViewModel.loadSummary()
+                            }
+                        }
+                    )
+                }
+                is ShiftUiState.Error -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Coba Lagi")
+                        Text(state.message)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = { shiftViewModel.refresh() }) {
+                            Text("Coba Lagi")
+                        }
                     }
                 }
             }
         }
     }
-        }
 }

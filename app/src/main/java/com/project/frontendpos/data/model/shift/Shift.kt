@@ -52,5 +52,19 @@ data class StartShiftRequest(
 data class EndShiftRequest(
     @SerializedName("actual_cash")
     val actualCash: Double
+)
 
+data class ShiftSummaryResponse(
+    val message: String,
+    val data: ShiftSummaryData
+)
+
+data class ShiftSummaryData(
+    val shift: ShiftResponse,
+    val starting_cash: Double,
+    val cash_sales: Double,
+    val cash_in: Double,
+    val cash_out: Double,
+    val expected_cash: Double,
+    val remaining_seconds: Long
 )

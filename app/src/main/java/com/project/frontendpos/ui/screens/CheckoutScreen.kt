@@ -153,7 +153,7 @@ fun CheckoutScreen(
                 total = cartViewModel.total,
                 paymentMethod = paymentMethod,
                 onPaymentMethodChange = { paymentMethod = it },
-                isLoading = state is CheckoutUiState.Loading,
+                isLoading = state is CheckoutUiState.Loading || state is CheckoutUiState.Success,
                 isCheckoutEnabled = cart.items.isNotEmpty(),
                 errorMessage = (state as? CheckoutUiState.Error)?.message,
                 formatCurrency = rupiahFormatter::format,

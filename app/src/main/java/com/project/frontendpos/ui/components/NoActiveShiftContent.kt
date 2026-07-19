@@ -18,7 +18,6 @@ fun NoActiveShiftContent(
     var startingCash by remember {
         mutableStateOf("")
     }
-
     val cashValue = startingCash.toDoubleOrNull()
 
     Column(
@@ -32,7 +31,8 @@ fun NoActiveShiftContent(
         Text(
             text = "Shift Kerja",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -47,11 +47,15 @@ fun NoActiveShiftContent(
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(2.dp),
-            shape = RoundedCornerShape(16.dp)
+            elevation = CardDefaults.cardElevation(6.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary, // Dark Blue
+                contentColor = MaterialTheme.colorScheme.onPrimary // White Text
+            )
         ) {
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(24.dp)
             ) {
                 Text(
                     text = "Starting Cash",
@@ -72,8 +76,7 @@ fun NoActiveShiftContent(
                     prefix = {
                         Text(
                             text = "Rp ",
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontWeight = FontWeight.Medium
                         )
                     },
                     placeholder = {
@@ -83,7 +86,18 @@ fun NoActiveShiftContent(
                         keyboardType = KeyboardType.Number
                     ),
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                        focusedPrefixColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                        unfocusedPrefixColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                        cursorColor = MaterialTheme.colorScheme.onPrimary,
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -98,7 +112,13 @@ fun NoActiveShiftContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                        disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    )
                 ) {
                     Text(
                         text = "Mulai Shift",

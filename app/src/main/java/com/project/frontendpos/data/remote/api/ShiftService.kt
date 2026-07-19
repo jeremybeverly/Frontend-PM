@@ -2,6 +2,7 @@ package com.project.frontendpos.data.remote.api
 
 import com.project.frontendpos.data.model.shift.EndShiftRequest
 import com.project.frontendpos.data.model.shift.ShiftContainerResponse
+import com.project.frontendpos.data.model.shift.ShiftSummaryResponse
 import com.project.frontendpos.data.model.shift.StartShiftRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -14,6 +15,12 @@ interface ShiftService {
         @Header("Authorization")
         token: String
     ): ShiftContainerResponse
+
+    @GET("api/shift/summary")
+    suspend fun getShiftSummary(
+        @Header("Authorization")
+        token: String
+    ): ShiftSummaryResponse
 
     @POST("api/shift/start")
     suspend fun startShift(
@@ -29,5 +36,11 @@ interface ShiftService {
         token: String,
         @Body
         request: EndShiftRequest
+    ): ShiftContainerResponse
+
+    @POST("api/shift/extend")
+    suspend fun extendShift(
+        @Header("Authorization")
+        token: String
     ): ShiftContainerResponse
 }
