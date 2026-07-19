@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.project.frontendpos.data.local.SessionManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.toRoute
 import com.project.frontendpos.ui.screens.CheckoutScreen
 import com.project.frontendpos.ui.screens.HistoryScreen
 import com.project.frontendpos.viewmodel.ProductViewModel
@@ -25,8 +26,10 @@ import com.project.frontendpos.viewmodel.ModifierViewModel
 import com.project.frontendpos.viewmodel.CartViewModel
 import com.project.frontendpos.ui.screens.LoginScreen
 import com.project.frontendpos.ui.screens.HomeScreen
+import com.project.frontendpos.ui.screens.QrPaymentScreen
 import com.project.frontendpos.ui.screens.ShiftScreen
 import com.project.frontendpos.viewmodel.CashflowViewModel
+import com.project.frontendpos.viewmodel.QrisViewModel
 import com.project.frontendpos.viewmodel.ShiftViewModel
 import com.project.frontendpos.viewmodel.TransactionDetailViewModel
 import com.project.frontendpos.viewmodel.TransactionHistoryViewModel
@@ -43,6 +46,7 @@ fun AppNavigation() {
     val shiftViewModel: ShiftViewModel = viewModel()
     val transactionHistoryViewModel: TransactionHistoryViewModel = viewModel()
     val transactionDetailViewModel: TransactionDetailViewModel = viewModel()
+    val qrisViewModel: QrisViewModel = viewModel()
 
     val showBottomBar = bottomNavItems.any { item ->
         currentDestination?.hasRoute(item.route::class) == true
@@ -94,13 +98,18 @@ fun AppNavigation() {
                     navController = navController,
                     productViewModel = productViewModel,
                     cartViewModel = cartViewModel,
-                    modifierViewModel = modifierViewModel
+                    modifierViewModel = modifierViewModel,
+                    shiftViewModel = shiftViewModel
                 )
             }
-            composable<ShiftRoute> {
+            composable<ShiftRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<ShiftRoute>()
                 ShiftScreen(
                     shiftViewModel = shiftViewModel,
-                    cashflowViewModel = cashflowViewModel
+                    cashflowViewModel = cashflowViewModel,
+                    onShiftStarted = {
+                        navController.popBackStack()
+                    }
                 )
             }
             composable<HistoryRoute> {
@@ -113,6 +122,15 @@ fun AppNavigation() {
                 CheckoutScreen(
                     navController = navController,
                     cartViewModel = cartViewModel
+                )
+            }
+            composable<QrPaymentRoute> { backStackEntry ->
+                val route =
+                    backStackEntry.toRoute<QrPaymentRoute>()
+                QrPaymentScreen(
+                    transactionId = route.transactionId,
+                    navController = navController,
+                    qrisViewModel = qrisViewModel
                 )
             }
         }

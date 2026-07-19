@@ -3,6 +3,8 @@ package com.project.frontendpos.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -35,6 +37,10 @@ fun HistoryScreen(
         mutableStateOf<String?>(null)
     }
 
+    var searchQuery by remember {
+        mutableStateOf("")
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,11 +51,8 @@ fun HistoryScreen(
         TransactionDetailBottomSheet(
             state = detailState,
             onDismiss = {
-
                 selectedTransactionId = null
-
                 transactionDetailViewModel.reset()
-
             }
         )
 
@@ -61,6 +64,25 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+                transactionHistoryViewModel.loadHistory(it)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = null
+                )
+            },
+            placeholder = {
+                Text("Cari nomor invoice...")
+            }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = {

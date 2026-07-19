@@ -13,7 +13,20 @@ data class TransactionRequest(
 )
 
 data class TransactionResponse(
-    val message: String
+    val message: String,
+    val data: TransactionCreateData
+)
+
+data class TransactionCreateData(
+    val transaction: CreatedTransaction
+)
+
+data class CreatedTransaction(
+    val _id: String,
+    val invoice_number: String,
+    val payment_method: String,
+    val total_amount: Double,
+    val status: String
 )
 
 data class TransactionDetailResponse(

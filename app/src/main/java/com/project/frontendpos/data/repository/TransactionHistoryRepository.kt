@@ -6,9 +6,13 @@ class TransactionHistoryRepository(
     private val api: TransactionHistoryService
 ) {
     suspend fun getTransactions(
-        token: String
+        token: String,
+        invoiceNumber: String? = null
     ) = runCatching {
-        api.getTransactions(token)
+        api.getTransactions(
+            token = token,
+            invoiceNumber = invoiceNumber
+        )
     }
 
     suspend fun getTransactionDetail(

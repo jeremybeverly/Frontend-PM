@@ -12,16 +12,38 @@ import com.project.frontendpos.ui.components.NoActiveShiftContent
 import com.project.frontendpos.viewmodel.CashflowViewModel
 import com.project.frontendpos.viewmodel.ShiftUiState
 import com.project.frontendpos.viewmodel.ShiftViewModel
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 
 @Composable
 fun ShiftScreen(
     shiftViewModel: ShiftViewModel = viewModel(),
-    cashflowViewModel: CashflowViewModel = viewModel()
+    cashflowViewModel: CashflowViewModel = viewModel(),
+    onShiftStarted: () -> Unit = {}
 ) {
     val state = shiftViewModel.uiState.value
     val cashflowState =
         cashflowViewModel.uiState.value
-    Box(
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+
+    var isStarting by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state) {
+        if (isStarting && state is ShiftUiState.Active) {
+            onShiftStarted()
+            isStarting = false
+        }
+    }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
+        }
+    ) { innerPadding -> Box(
         modifier = Modifier.fillMaxSize()
     ) {
         when (state) {
@@ -35,9 +57,9 @@ fun ShiftScreen(
             }
 
             ShiftUiState.NoActiveShift -> {
-
                 NoActiveShiftContent(
                     onStartShift = {
+                        isStarting = true
                         shiftViewModel.startShift(it)
                     }
                 )
@@ -89,4 +111,5 @@ fun ShiftScreen(
             }
         }
     }
+        }
 }
