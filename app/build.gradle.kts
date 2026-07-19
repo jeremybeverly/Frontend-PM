@@ -25,8 +25,8 @@ android {
                 load(localPropertiesFile.inputStream())
             }
         }
-        val baseUrl = properties.getProperty("API_BASE_URL") ?: "\"http://10.0.2.2:5000/\""
-        buildConfigField("String", "BASE_URL", baseUrl)
+        val baseUrl = (properties.getProperty("API_BASE_URL") ?: project.findProperty("API_BASE_URL")?.toString() ?: "http://10.0.2.2:5000/").trim('"')
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {

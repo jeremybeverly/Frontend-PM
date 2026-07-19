@@ -5,6 +5,8 @@ import com.project.frontendpos.data.remote.api.AuthService
 import com.project.frontendpos.data.remote.api.ModifierService
 import com.project.frontendpos.data.remote.api.ProductService
 import com.project.frontendpos.data.remote.api.TransactionService
+import com.project.frontendpos.data.remote.api.ShiftService
+import com.project.frontendpos.data.remote.api.CashflowService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -35,4 +37,6 @@ object RetrofitClient {
     val productApi: ProductService by lazy { retrofit.create(ProductService::class.java) }
     val modifierApi: ModifierService by lazy { retrofit.create(ModifierService::class.java) }
     val transactionApi: TransactionService by lazy { retrofit.create(TransactionService::class.java) }
+    val shiftApi: ShiftService by lazy { retrofit.create(ShiftService::class.java) }
+    val cashflowApi: CashflowService by lazy { retrofit.create(CashflowService::class.java) }
 }

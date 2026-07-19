@@ -24,6 +24,9 @@ import com.project.frontendpos.viewmodel.ModifierViewModel
 import com.project.frontendpos.viewmodel.CartViewModel
 import com.project.frontendpos.ui.screens.LoginScreen
 import com.project.frontendpos.ui.screens.HomeScreen
+import com.project.frontendpos.ui.screens.ShiftScreen
+import com.project.frontendpos.viewmodel.CashflowViewModel
+import com.project.frontendpos.viewmodel.ShiftViewModel
 
 @Composable
 fun AppNavigation() {
@@ -33,6 +36,8 @@ fun AppNavigation() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val modifierViewModel: ModifierViewModel = viewModel()
+    val cashflowViewModel: CashflowViewModel = viewModel()
+    val shiftViewModel: ShiftViewModel = viewModel()
     val showBottomBar = bottomNavItems.any { item ->
         currentDestination?.hasRoute(item.route::class) == true
     }
@@ -87,7 +92,10 @@ fun AppNavigation() {
                 )
             }
             composable<ShiftRoute> {
-                PlaceholderScreen("Shift Kerja")
+                ShiftScreen(
+                    shiftViewModel = shiftViewModel,
+                    cashflowViewModel = cashflowViewModel
+                )
             }
             composable<HistoryRoute> {
                 PlaceholderScreen("Riwayat")
