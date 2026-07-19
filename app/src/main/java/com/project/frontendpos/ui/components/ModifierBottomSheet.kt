@@ -1,11 +1,13 @@
 package com.project.frontendpos.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,11 +24,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.project.frontendpos.data.model.modifier.ModifierGroupResponse
 import com.project.frontendpos.data.model.modifier.ModifierResponse
+import com.project.frontendpos.data.remote.RetrofitClient
 import com.project.frontendpos.viewmodel.ModifierUiState
 import com.project.frontendpos.viewmodel.ModifierViewModel
 import kotlinx.coroutines.launch
@@ -41,24 +47,22 @@ fun ModifierBottomSheet(
     onAddToCart: (
         List<ModifierResponse>,
         String,
-        Int // <-- Quantity parameter added
+        Int
     ) -> Unit
 ) {
     val state = modifierViewModel.uiState.value
-
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     val selectedModifiers = remember {
         mutableStateMapOf<String, MutableList<ModifierResponse>>()
     }
-
     var notes by remember { mutableStateOf("") }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface // Ensures a clean background
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         when (state) {
             ModifierUiState.Idle -> {}
@@ -67,7 +71,7 @@ fun ModifierBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(32.dp)
-                        .height(200.dp), // Prevent height jumping
+                        .height(200.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -87,13 +91,13 @@ fun ModifierBottomSheet(
                     selectedModifiers = selectedModifiers,
                     notes = notes,
                     onNotesChange = { notes = it },
-                    onAddToCart = { qty -> // <-- Receive qty from the child view
+                    onAddToCart = { qty ->
                         scope.launch {
                             sheetState.hide()
                             onAddToCart(
                                 selectedModifiers.values.flatten(),
                                 notes,
-                                qty // <-- Pass qty to the parent screen
+                                qty
                             )
                         }
                     }
@@ -111,12 +115,9 @@ private fun CustomizationContent(
     onNotesChange: (String) -> Unit,
     onAddToCart: (qty: Int) -> Unit
 ) {
-
     val rupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply {
         maximumFractionDigits = 0
     }
-
-
     var quantity by remember { mutableIntStateOf(1) }
 
     Column(
@@ -130,13 +131,45 @@ private fun CustomizationContent(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
+
         Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = rupiah.format(state.data.product.price),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.SemiBold
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // PRODUCT IMAGE BANNER
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            val imageUrl = state.data.product.imageUrl?.let { RetrofitClient.resolveImageUrl(it) }
+
+            if (!imageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = state.data.product.productName,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Image,
+                    contentDescription = "Product Image",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -200,7 +233,7 @@ private fun CustomizationContent(
             onClick = { onAddToCart(quantity) },
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1C355E)
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(

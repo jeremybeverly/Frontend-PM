@@ -23,14 +23,19 @@ object RetrofitClient {
 
     fun resolveImageUrl(relativePath: String?): String {
         if (relativePath.isNullOrBlank()) return "https://placehold.co/600x400/png"
+
+        val cleanBase = BASE_URL.trimEnd('/')
+
         if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
+            if (relativePath.contains("localhost") || relativePath.contains("127.0.0.1")) {
+                val extractedPath = relativePath.replace(Regex("^https?://(localhost|127\\.0\\.0\\.1)(:\\d+)?"), "")
+                val cleanPath = if (extractedPath.startsWith("/")) extractedPath else "/$extractedPath"
+                return "$cleanBase$cleanPath"
+            }
             return relativePath
         }
 
-
-        val cleanBase = BASE_URL.trimEnd('/')
         val cleanPath = if (relativePath.startsWith("/")) relativePath else "/$relativePath"
-
         return "$cleanBase$cleanPath"
     }
 
