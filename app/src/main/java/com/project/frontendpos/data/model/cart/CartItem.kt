@@ -7,5 +7,5 @@ data class CartItem(
     val product: ProductResponse,
     val modifiers: List<ModifierResponse> = emptyList(),
     val note: String = "",
-    var quantity: Int = 1
+    val quantity: Int = 1
 )

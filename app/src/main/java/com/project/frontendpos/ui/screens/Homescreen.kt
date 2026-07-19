@@ -1,28 +1,32 @@
 package com.project.frontendpos.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.project.frontendpos.data.model.product.ProductResponse
 import com.project.frontendpos.ui.components.*
+import com.project.frontendpos.ui.navigation.CheckoutRoute
 import com.project.frontendpos.viewmodel.CartViewModel
 import com.project.frontendpos.viewmodel.ProductUiState
 import com.project.frontendpos.viewmodel.ProductViewModel
 import com.project.frontendpos.viewmodel.ModifierViewModel
+import com.project.frontendpos.data.local.SessionManager
+import com.project.frontendpos.ui.navigation.LoginRoute
 
 @Composable
 fun HomeScreen(
@@ -30,30 +34,16 @@ fun HomeScreen(
     productViewModel: ProductViewModel,
     cartViewModel: CartViewModel,
     modifierViewModel: ModifierViewModel
-){
+) {
     val productState = productViewModel.uiState.value
     val cart by cartViewModel.cart.collectAsState()
+
     val itemCount = cart.items.sumOf { it.quantity }
-    val productSubtotal = cart.items.sumOf { it.product.price * it.quantity }
-    val modifierSubtotal = cart.items.sumOf { item ->
-        item.modifiers.sumOf { it.extraPrice } * item.quantity
-    }
 
-    var selectedProduct by remember {
-        mutableStateOf<ProductResponse?>(null)
-    }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedProduct by remember { mutableStateOf<ProductResponse?>(null) }
 
-    var showBottomSheet by remember {
-        mutableStateOf(false)
-    }
-
-    val categories = listOf(
-        "",
-        "coffee",
-        "non-coffee",
-        "pastry",
-        "others"
-    )
+    val categories = listOf("", "coffee", "non-coffee", "pastry", "others")
 
     Column(
         modifier = Modifier
@@ -64,7 +54,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
                 text = "Katalog Produk",
                 style = MaterialTheme.typography.headlineSmall,
@@ -72,137 +62,119 @@ fun HomeScreen(
             )
             IconButton(
                 onClick = {
-                    // TODO logout
+                    SessionManager.clearSession()
+                    cartViewModel.clear()
+                    navController.navigate(LoginRoute) {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
             ) {
                 Icon(Icons.Default.Logout, null)
             }
         }
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        //searchbar
         ProductSearchBar(
             query = productViewModel.searchQuery.value,
-            onQueryChange = {
-                productViewModel.onSearchChanged(it)
-            }
+            onQueryChange = { productViewModel.onSearchChanged(it) }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        //categories
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ){
-            items(categories){ category ->
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(categories) { category ->
                 CategoryChip(
                     title = if (category.isBlank()) "Semua" else category,
                     selected = category == productViewModel.selectedCategory.value,
-                    onSelected = {
-                        productViewModel.onCategorySelected(category)
-                    }
+                    onSelected = { productViewModel.onCategorySelected(category) }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //products
-        when (productState) {
-            ProductUiState.Loading -> {
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+        Box(modifier = Modifier.weight(1f)) {
+            when (productState) {
+                ProductUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-            }
-
-            is ProductUiState.Error -> {
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(productState.message)
+                is ProductUiState.Error -> {
+                    Text(productState.message, modifier = Modifier.align(Alignment.Center))
                 }
-            }
+                is ProductUiState.Success -> {
+                    val validProducts = productState.products.filter { it.product_name.isNotBlank() }
 
-            is ProductUiState.Success -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(productState.products) { product ->
-                        ProductCard(
-                            product = product,
-                            quantity = cartViewModel.getQuantity(product),
-                            onClick = {
-                                selectedProduct = product
-                                showBottomSheet = true
-                                modifierViewModel.loadCustomization(
-                                    product._id
-                                )
-                            }
-
-                        )
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(validProducts) { product ->
+                            ProductCard(
+                                product = product,
+                                quantity = cartViewModel.getQuantity(product),
+                                onClick = {
+                                    selectedProduct = product
+                                    modifierViewModel.loadCustomization(product._id)
+                                    showBottomSheet = true
+                                }
+                            )
+                        }
                     }
+                }
+            }
+
+            if (cart.items.isNotEmpty()) {
+                Button(
+                    onClick = { navController.navigate(CheckoutRoute) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                        .fillMaxWidth(0.9f)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1C355E)
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Cart",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "$itemCount Item dalam Keranjang",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
 
-        //cart
-        Text(
-            text = "Pesanan",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyColumn(
-            modifier = Modifier.heightIn(max = 180.dp)
-        ) {
-            items(cart.items) { item ->
-                CartItemCard(
-                    item = item,
-                    onIncrease = {
-                        cartViewModel.increase(item)
-                    },
-                    onDecrease = {
-                        cartViewModel.decrease(item)
-                    }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-        OrderSummary(
-            itemCount = itemCount,
-            productSubtotal = productSubtotal,
-            modifierSubtotal = modifierSubtotal,
-            tax = cartViewModel.tax,
-            total = cartViewModel.total,
-            enabled = cart.items.isNotEmpty(),
-            onCheckout = {
-                navController.navigate("checkout")
-            }
-        )
-
-        if(showBottomSheet && selectedProduct != null){
+        if (showBottomSheet && selectedProduct != null) {
             ModifierBottomSheet(
                 modifierViewModel = modifierViewModel,
                 onDismiss = {
                     showBottomSheet = false
+                    selectedProduct = null
+                    modifierViewModel.reset()
                 },
-                onAddToCart = {
-                        modifiers,
-                        notes ->
+                onAddToCart = { modifiers, notes, qty ->
                     cartViewModel.addProduct(
-                        selectedProduct!!,
-                        modifiers,
-                        notes
+                        product = selectedProduct!!,
+                        modifiers = modifiers,
+                        note = notes,
+                        qty = qty
                     )
                     showBottomSheet = false
+                    selectedProduct = null
+                    modifierViewModel.reset()
                 }
             )
         }

@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable object ShiftRoute
 @Serializable object HistoryRoute
 
+@Serializable object CheckoutRoute
 data class BottomNavItem(
     val label: String,
     val icon: ImageVector,

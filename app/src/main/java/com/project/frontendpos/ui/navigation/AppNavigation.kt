@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.project.frontendpos.data.local.SessionManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.project.frontendpos.ui.screens.CheckoutScreen
 import com.project.frontendpos.viewmodel.ProductViewModel
 import com.project.frontendpos.viewmodel.ModifierViewModel
 import com.project.frontendpos.viewmodel.CartViewModel
@@ -90,6 +91,12 @@ fun AppNavigation() {
             }
             composable<HistoryRoute> {
                 PlaceholderScreen("Riwayat")
+            }
+            composable<CheckoutRoute> {
+                CheckoutScreen(
+                    navController = navController,
+                    cartViewModel = cartViewModel
+                )
             }
         }
     }
