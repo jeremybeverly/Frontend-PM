@@ -51,7 +51,7 @@ fun CartItemCard(
                 )
             }
 
-            if (item.note.isNotBlank()) {
+            if (!item.note.isNullOrBlank()) {
                 Text(
                     text = "Note: ${item.note}",
                     style = MaterialTheme.typography.bodySmall
