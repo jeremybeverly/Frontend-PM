@@ -18,24 +18,28 @@ class CartViewModel: ViewModel() {
     fun addProduct(
         product: ProductResponse,
         modifiers: List<ModifierResponse>,
-        note: String
+        note: String,
+        qty: Int = 1 // Add this quantity parameter
     ) {
         val currentItems = _cart.value.items.toMutableList()
-        val existing = currentItems.find {
+        val index = currentItems.indexOfFirst {
             it.product._id == product._id &&
                     it.note == note &&
                     it.modifiers.map { m -> m.id }.sorted() ==
                     modifiers.map { m -> m.id }.sorted()
         }
-
-        if (existing != null) {
-            existing.quantity++
+        if (index != -1) {
+            val existing = currentItems[index]
+            currentItems[index] = existing.copy(
+                quantity = existing.quantity + qty // Use custom qty
+            )
         } else {
             currentItems.add(
                 CartItem(
                     product = product,
                     modifiers = modifiers,
-                    note = note
+                    note = note,
+                    quantity = qty // Use custom qty
                 )
             )
         }
@@ -44,28 +48,63 @@ class CartViewModel: ViewModel() {
 
     fun getQuantity(product: ProductResponse): Int{
         return cart.value.items
-            .find {
+            .filter {
                 it.product._id == product._id
             }
-            ?.quantity ?: 0
+            .sumOf {
+                it.quantity
+            }
     }
 
-    fun increase(item: CartItem){
-        item.quantity++
-        _cart.value = _cart.value.copy()
-    }
-
-    fun decrease(item: CartItem){
-        if(item.quantity > 1){
-            item.quantity--
-        } else {
-            remove(item)
+    fun increase(item: CartItem) {
+        val updatedItems = _cart.value.items.map {
+            if (
+                it.product._id == item.product._id &&
+                it.note == item.note &&
+                it.modifiers.map { m -> m.id }.sorted() ==
+                item.modifiers.map { m -> m.id }.sorted()
+            ) {
+                it.copy(
+                    quantity = it.quantity + 1
+                )
+            } else {
+                it
+            }
         }
-        _cart.value = _cart.value.copy()
+        _cart.value = CartState(updatedItems)
     }
 
-    fun remove(item: CartItem){
-        _cart.value = CartState(_cart.value.items.filter { it.product._id != item.product._id })
+    fun decrease(item: CartItem) {
+        if (item.quantity == 1) {
+            remove(item)
+            return
+        }
+        val updatedItems = _cart.value.items.map {
+            if (
+                it.product._id == item.product._id &&
+                it.note == item.note &&
+                it.modifiers.map { m -> m.id }.sorted() ==
+                item.modifiers.map { m -> m.id }.sorted()
+            ) {
+                it.copy(
+                    quantity = it.quantity - 1
+                )
+            } else {
+                it
+            }
+        }
+        _cart.value = CartState(updatedItems)
+    }
+
+    fun remove(item: CartItem) {
+        _cart.value = CartState(
+            _cart.value.items.filterNot {
+                it.product._id == item.product._id &&
+                        it.note == item.note &&
+                        it.modifiers.map { m -> m.id }.sorted() ==
+                        item.modifiers.map { m -> m.id }.sorted()
+            }
+        )
     }
 
     fun clear(){

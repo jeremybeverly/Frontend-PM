@@ -7,6 +7,8 @@ import com.project.frontendpos.data.local.SessionManager
 import com.project.frontendpos.data.model.modifier.ProductCustomizationResponse
 import com.project.frontendpos.data.remote.RetrofitClient
 import com.project.frontendpos.data.repository.ModifierRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 sealed interface ModifierUiState {
@@ -39,20 +41,26 @@ class ModifierViewModel : ViewModel() {
 
     val uiState: State<ModifierUiState> =
         _uiState
+    private var customizationJob: Job? = null
 
     fun loadCustomization(
         productId: String
     ) {
 
-        viewModelScope.launch {
+        customizationJob?.cancel()
+        customizationJob = viewModelScope.launch {
 
             _uiState.value =
                 ModifierUiState.Loading
 
-            repository.getCustomization(
+            val result = repository.getCustomization(
                 SessionManager.formattedToken,
                 productId
             )
+
+            if (!isActive) return@launch
+
+            result
                 .onSuccess {
 
                     _uiState.value =
@@ -70,6 +78,12 @@ class ModifierViewModel : ViewModel() {
 
         }
 
+    }
+
+    fun reset() {
+        customizationJob?.cancel()
+        customizationJob = null
+        _uiState.value = ModifierUiState.Idle
     }
 
 }
