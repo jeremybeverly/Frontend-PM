@@ -27,7 +27,6 @@ object RetrofitClient {
         val cleanBase = BASE_URL.trimEnd('/')
 
         if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
-            // FIX: If the database saved it as localhost, rewrite it to use the friend's IP
             if (relativePath.contains("localhost") || relativePath.contains("127.0.0.1")) {
                 val extractedPath = relativePath.replace(Regex("^https?://(localhost|127\\.0\\.0\\.1)(:\\d+)?"), "")
                 val cleanPath = if (extractedPath.startsWith("/")) extractedPath else "/$extractedPath"
