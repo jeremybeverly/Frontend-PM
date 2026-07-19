@@ -5,13 +5,16 @@ import com.project.frontendpos.data.model.transaction.TransactionHistoryResponse
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface TransactionHistoryService {
 
     @GET("api/transactions")
     suspend fun getTransactions(
         @Header("Authorization")
-        token: String
+        token: String,
+        @Query("invoice_number")
+        invoiceNumber: String? = null
 
     ): TransactionHistoryResponse
 

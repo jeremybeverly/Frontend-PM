@@ -43,11 +43,13 @@ class TransactionHistoryViewModel : ViewModel() {
         loadHistory()
     }
 
-    fun loadHistory() {
+    fun loadHistory(
+        invoiceNumber: String? = null
+    ) {
         viewModelScope.launch {
-
             repository.getTransactions(
-                SessionManager.formattedToken
+                token = SessionManager.formattedToken,
+                invoiceNumber = invoiceNumber
             )
                 .onSuccess {
 
@@ -55,7 +57,6 @@ class TransactionHistoryViewModel : ViewModel() {
                         HistoryUiState.Success(
                             it.data
                         )
-
                 }
                 .onFailure {
 
@@ -64,9 +65,7 @@ class TransactionHistoryViewModel : ViewModel() {
                             it.message
                                 ?: "Gagal memuat riwayat transaksi"
                         )
-
                 }
-
         }
     }
 

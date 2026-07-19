@@ -15,4 +15,14 @@ class TransactionRepository(
             request
         )
     }
+
+    suspend fun getTransactionQris(
+        token: String,
+        transactionId: String
+    ) = runCatching {
+        api.getTransactionQris(
+            token,
+            transactionId
+        )
+    }
 }

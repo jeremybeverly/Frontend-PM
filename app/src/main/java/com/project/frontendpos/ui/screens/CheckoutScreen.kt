@@ -39,6 +39,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -48,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,13 +63,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.project.frontendpos.data.model.cart.CartItem
+import com.project.frontendpos.ui.navigation.QrPaymentRoute
 import com.project.frontendpos.viewmodel.CartViewModel
 import com.project.frontendpos.viewmodel.CheckoutUiState
 import com.project.frontendpos.viewmodel.CheckoutViewModel
+import kotlinx.coroutines.delay
 import java.text.NumberFormat
 import java.util.Locale
-
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun CheckoutScreen(
     navController: NavController,
@@ -77,16 +82,51 @@ fun CheckoutScreen(
     val state = checkoutViewModel.uiState.value
     var paymentMethod by remember { mutableStateOf("cash") }
     val rupiahFormatter = remember { rupiahFormatter() }
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(state) {
-        if (state is CheckoutUiState.Success) {
-            cartViewModel.clear()
-            checkoutViewModel.resetState()
-            navController.popBackStack()
+        when (state) {
+            is CheckoutUiState.Success -> {
+                val transaction =
+                    state.response.data.transaction
+                if (transaction.payment_method.equals("qris", true)) {
+                    cartViewModel.clear()
+                    checkoutViewModel.resetState()
+                    navController.navigate(
+                        QrPaymentRoute(
+                            transactionId = transaction._id
+                        )
+                    )
+                } else {
+
+                    snackbarHostState.showSnackbar(
+                        "Pembayaran berhasil"
+                    )
+                    delay(800)
+                    cartViewModel.clear()
+                    checkoutViewModel.resetState()
+                    navController.popBackStack()
+                }
+            }
+
+            is CheckoutUiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = (state as CheckoutUiState.Error).message
+                )
+            }
+            else -> Unit
         }
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
+        },
         topBar = {
             TopAppBar(
                 title = {
