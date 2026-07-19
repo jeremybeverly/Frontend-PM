@@ -11,31 +11,16 @@ import com.project.frontendpos.data.repository.CashflowRepository
 import kotlinx.coroutines.launch
 
 sealed interface CashflowUiState {
-
     object Idle : CashflowUiState
     object Loading : CashflowUiState
-
-    data class Success(
-        val cashflows: List<CashflowResponse>
-    ) : CashflowUiState
-
-    data class Error(
-        val message: String
-    ) : CashflowUiState
+    data class Success(val cashflows: List<CashflowResponse>) : CashflowUiState
+    data class Error(val message: String) : CashflowUiState
 }
 
 class CashflowViewModel : ViewModel() {
+    private val repository = CashflowRepository(RetrofitClient.cashflowApi)
 
-    private val repository =
-        CashflowRepository(
-            RetrofitClient.cashflowApi
-        )
-
-    private val _uiState =
-        mutableStateOf<CashflowUiState>(
-            CashflowUiState.Idle
-        )
-
+    private val _uiState = mutableStateOf<CashflowUiState>(CashflowUiState.Idle)
     val uiState: State<CashflowUiState> = _uiState
 
     init {
@@ -43,96 +28,44 @@ class CashflowViewModel : ViewModel() {
     }
 
     fun loadCashflows() {
-
         viewModelScope.launch {
-
-            _uiState.value =
-                CashflowUiState.Loading
-
-            repository.getCashflows(
-                SessionManager.formattedToken
-            )
+            _uiState.value = CashflowUiState.Loading
+            repository.getCashflows(SessionManager.formattedToken)
                 .onSuccess { response ->
-
-                    _uiState.value =
-                        CashflowUiState.Success(
-                            response.data
-                        )
-
+                    _uiState.value = CashflowUiState.Success(response.data)
                 }
                 .onFailure {
-
-                    _uiState.value =
-                        CashflowUiState.Error(
-                            it.message ?: "Failed to load cashflows"
-                        )
-
+                    _uiState.value = CashflowUiState.Error(it.message ?: "Failed to load cashflows")
                 }
-
         }
-
     }
 
-    fun addCashIn(
-        amount: Double,
-        reason: String
-    ) {
-
-        createCashflow(
-            "cash_in",
-            amount,
-            reason
-        )
-
+    fun addCashIn(amount: Double, reason: String, onSuccess: () -> Unit = {}) {
+        createCashflow("cash_in", amount, reason, onSuccess)
     }
 
-    fun addCashOut(
-        amount: Double,
-        reason: String
-    ) {
-
-        createCashflow(
-            "cash_out",
-            amount,
-            reason
-        )
-
+    fun addCashOut(amount: Double, reason: String, onSuccess: () -> Unit = {}) {
+        createCashflow("cash_out", amount, reason, onSuccess)
     }
 
     private fun createCashflow(
         flowType: String,
         amount: Double,
-        reason: String
+        reason: String,
+        onSuccess: () -> Unit
     ) {
-
         viewModelScope.launch {
-
-            repository.createCashflow(
-                SessionManager.formattedToken,
-                flowType,
-                amount,
-                reason
-            )
+            repository.createCashflow(SessionManager.formattedToken, flowType, amount, reason)
                 .onSuccess {
-
-                    loadCashflows()
-
+                    onSuccess()
                 }
                 .onFailure {
-
-                    _uiState.value =
-                        CashflowUiState.Error(
-                            it.message ?: "Failed to save cashflow"
-                        )
-
+                    _uiState.value = CashflowUiState.Error(it.message ?: "Failed to save cashflow")
                 }
-
         }
-
     }
 
     fun refresh() {
         loadCashflows()
     }
-
 }

@@ -3,12 +3,15 @@ package com.project.frontendpos.ui.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -30,6 +33,7 @@ import com.project.frontendpos.ui.screens.QrPaymentScreen
 import com.project.frontendpos.ui.screens.ShiftScreen
 import com.project.frontendpos.viewmodel.CashflowViewModel
 import com.project.frontendpos.viewmodel.QrisViewModel
+import com.project.frontendpos.viewmodel.ShiftSummaryViewModel
 import com.project.frontendpos.viewmodel.ShiftViewModel
 import com.project.frontendpos.viewmodel.TransactionDetailViewModel
 import com.project.frontendpos.viewmodel.TransactionHistoryViewModel
@@ -47,6 +51,7 @@ fun AppNavigation() {
     val transactionHistoryViewModel: TransactionHistoryViewModel = viewModel()
     val transactionDetailViewModel: TransactionDetailViewModel = viewModel()
     val qrisViewModel: QrisViewModel = viewModel()
+    val shiftSummaryViewModel: ShiftSummaryViewModel = viewModel()
 
     val showBottomBar = bottomNavItems.any { item ->
         currentDestination?.hasRoute(item.route::class) == true
@@ -57,9 +62,12 @@ fun AppNavigation() {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ) {
                     bottomNavItems.forEach { item ->
                         val isSelected = currentDestination?.hasRoute(item.route::class) == true
+
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
@@ -72,7 +80,15 @@ fun AppNavigation() {
                                 }
                             },
                             icon = { Icon(item.icon, contentDescription = item.label) },
-                            label = { Text(item.label) }
+                            label = { Text(item.label) },
+
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primary,
+                                selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
                     }
                 }
@@ -107,6 +123,7 @@ fun AppNavigation() {
                 ShiftScreen(
                     shiftViewModel = shiftViewModel,
                     cashflowViewModel = cashflowViewModel,
+                    shiftSummaryViewModel = shiftSummaryViewModel,
                     onShiftStarted = {
                         navController.popBackStack()
                     }
@@ -125,8 +142,7 @@ fun AppNavigation() {
                 )
             }
             composable<QrPaymentRoute> { backStackEntry ->
-                val route =
-                    backStackEntry.toRoute<QrPaymentRoute>()
+                val route = backStackEntry.toRoute<QrPaymentRoute>()
                 QrPaymentScreen(
                     transactionId = route.transactionId,
                     navController = navController,
@@ -140,8 +156,8 @@ fun AppNavigation() {
 @Composable
 fun PlaceholderScreen(name: String) {
     androidx.compose.foundation.layout.Box(
-        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         Text(text = "$name Screen")
     }

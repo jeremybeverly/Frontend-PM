@@ -112,6 +112,20 @@ class ShiftViewModel : ViewModel() {
         }
     }
 
+    fun extendShift(onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            _uiState.value = ShiftUiState.Loading
+            repository.extendShift(SessionManager.formattedToken)
+                .onSuccess {
+                    loadShift()
+                    onSuccess()
+                }
+                .onFailure {
+                    _uiState.value = ShiftUiState.Error(it.message ?: "Gagal memperpanjang shift")
+                }
+        }
+    }
+
     fun refresh() {
         loadShift()
     }

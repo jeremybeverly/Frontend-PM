@@ -111,7 +111,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 when (productState) {
                     ProductUiState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

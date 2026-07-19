@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,11 +58,20 @@ fun HistoryScreen(
             }
         )
 
-        Text(
-            text = "Riwayat Transaksi",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Riwayat Transaksi",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = { transactionHistoryViewModel.loadHistory() }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -220,9 +231,17 @@ fun HistoryScreen(
             }
 
             is HistoryUiState.Error -> {
-
-                Text(currentState.message)
-
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(currentState.message, color = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = { transactionHistoryViewModel.loadHistory() }) {
+                        Text("Coba Lagi")
+                    }
+                }
             }
 
             HistoryUiState.Idle -> {}

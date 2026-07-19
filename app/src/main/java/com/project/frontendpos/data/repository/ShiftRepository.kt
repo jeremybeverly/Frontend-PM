@@ -9,19 +9,22 @@ class ShiftRepository(private val api: ShiftService) {
     suspend fun getActiveShift(
         token: String
     ): Result<ShiftContainerResponse> {
-
         return runCatching {
             api.getActiveShift(token)
         }
+    }
+
+    suspend fun getShiftSummary(
+        token: String
+    ) = runCatching {
+        api.getShiftSummary(token)
     }
 
     suspend fun startShift(
         token: String,
         startingCash: Double
     ): Result<ShiftContainerResponse> {
-
         return runCatching {
-
             api.startShift(
                 token,
                 StartShiftRequest(startingCash)
@@ -38,6 +41,14 @@ class ShiftRepository(private val api: ShiftService) {
                 token,
                 EndShiftRequest(actualCash)
             )
+        }
+    }
+
+    suspend fun extendShift(
+        token: String
+    ): Result<ShiftContainerResponse> {
+        return runCatching {
+            api.extendShift(token)
         }
     }
 }

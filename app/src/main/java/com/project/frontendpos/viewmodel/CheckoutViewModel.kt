@@ -29,6 +29,10 @@ class CheckoutViewModel : ViewModel() {
         cartItems: List<CartItem>,
         paymentMethod: String
     ) {
+        if (_uiState.value is CheckoutUiState.Loading || _uiState.value is CheckoutUiState.Success) {
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = CheckoutUiState.Loading
 
